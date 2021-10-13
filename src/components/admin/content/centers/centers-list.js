@@ -1,19 +1,8 @@
-import React, { useState } from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button,Modal  } from 'antd';
-import Draggable from 'react-draggable';
-import AddCenter from './add-center';
-
-//originData is dummy data to nbadlouha wa9teli nzidou redux
-const originData = [];
-for (let i = 0; i < 20; i++) {
-  originData.push({
-    key: i.toString(),
-    center_name: `Edrward ${i}`,
-    governorate: "32",
-    city: `London Park no. ${i}`,
-    center_capacity: 1000,
-  });
-}
+import React, { useState, useEffect} from 'react';
+import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button  } from 'antd'; 
+import { useDispatch, useSelector } from "react-redux"
+import * as actions from '../../../../redux/actions/centers'
+import AddCenter from './add-center'; 
 
 const EditableCell = ({
   editing,
@@ -52,42 +41,26 @@ const EditableCell = ({
 
 const CentersList = () => {
   const [form] = Form.useForm();
-  const [data, setData] = useState(originData);
+  const centers = useSelector((state) => state.centers)
+  const [data, setData] = useState(centers.list.map((center,key) =>({
+    ...center,
+    key: key.toString()
+  })));
   const [editingKey, setEditingKey] = useState('');
-  const [visible,setVisible] = useState(false);
-  const [disabled,setDisabled] = useState(true);
-  const [bounds,setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
-  const draggleRef = React.createRef();
-
+  const [visible,setVisible] = useState(false);  
+  const dispatch = useDispatch() 
+  
+  useEffect(() => {
+    dispatch(actions.fetchCenters())  
+  }, [])
   const showModal = () => {
     setVisible( true);
-  };
-
-  const handleOk = e => {
-    console.log(e);
-    setVisible(false);
-  };
-
-  const handleCancel = e => {
-    console.log(e);
-    setVisible(false);
-  };
-
-  const onStart = (event, uiData) => {
-    const { clientWidth, clientHeight } = window?.document?.documentElement;
-    const targetRect = draggleRef?.current?.getBoundingClientRect();
-    setBounds({
-        left: -targetRect?.left + uiData?.x,
-        right: clientWidth - (targetRect?.right - uiData?.x),
-        top: -targetRect?.top + uiData?.y,
-        bottom: clientHeight - (targetRect?.bottom - uiData?.y),
-      });
-  };
+  }; 
   const isEditing = (record) => record.key === editingKey;
 
   const edit = (record) => {
     form.setFieldsValue({
-      center_name: '',
+      name: '',
       governorate: '',
       city: '',
       center_capacity: '',
@@ -123,8 +96,8 @@ const CentersList = () => {
 
   const columns = [
     {
-      title: 'center_name',
-      dataIndex: 'center_name',
+      title: 'name',
+      dataIndex: 'name',
       width: '25%',
       editable: true,
     },
@@ -153,15 +126,15 @@ const CentersList = () => {
         const editable = isEditing(record);
         return editable ? (
           <span>
-            <a
-              href="javascript:;"
+            <Button
+              type="text"
               onClick={() => save(record.key)}
               style={{
                 marginRight: 8,
               }}
             >
               Save
-            </a>
+            </Button>
             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
               <a>Cancel</a>
             </Popconfirm>
@@ -210,7 +183,8 @@ const CentersList = () => {
         >
           Add center
         </Button>
-      <Table
+        {visible && <AddCenter visible={visible} setVisible={setVisible} />}
+      {centers &&<Table
         components={{
           body: {
             cell: EditableCell,
@@ -223,47 +197,8 @@ const CentersList = () => {
         pagination={{
           onChange: cancel,
         }}
-      />
+      />}
     </Form>
-    <Modal
-          title={
-            <div
-              style={{
-                width: '100%',
-                cursor: 'move',
-              }}
-              onMouseOver={() => {
-                if (disabled) {
-                    setDisabled(false);
-                }
-              }}
-              onMouseOut={() => {
-                setDisabled(true);
-              }}
-              // fix eslintjsx-a11y/mouse-events-have-key-events
-              // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/master/docs/rules/mouse-events-have-key-events.md
-              onFocus={() => {}}
-              onBlur={() => {}}
-              // end
-            >
-              Add center
-            </div>
-          }
-          visible={visible}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          modalRender={modal => (
-            <Draggable
-              disabled={disabled}
-              bounds={bounds}
-              onStart={(event, uiData) => onStart(event, uiData)}
-            >
-              <div ref={draggleRef}>{modal}</div>
-            </Draggable>
-          )}
-        >
-            <AddCenter />
-        </Modal>
         </>);
 };
  
