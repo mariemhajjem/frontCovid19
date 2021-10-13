@@ -1,6 +1,6 @@
 import { Route, Switch , Redirect,useHistory} from "react-router-dom";
 import routes from "./content/routes"; 
-import authProvider from '../auth-provider'
+import authProvider from '../../auth-provider'
 import NotAuthorized from "../notAuthorized";
 import Sidebar from "./content/sidebar";
 import { Layout,Button } from "antd";

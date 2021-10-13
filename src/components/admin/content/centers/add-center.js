@@ -1,14 +1,36 @@
 import React, { useState } from 'react';
-import gouvernorat from '../../../constants/gouvernorat'
-import villes from '../../../constants/villes'
+import gouvernorat from '../../../../constants/gouvernorat'
+import villes from '../../../../constants/villes'
+import { Modal  } from 'antd';
+import Draggable from 'react-draggable';
 
-const AddCenter = () => {  
-    const [gov,setGov] = useState('default')
+const AddCenter = ({visible,setVisible}) => {   
     const [cities,setCities] = useState([])
     const [selectedGov,setSelectedGov] = useState('--Choose Gov--')
     const [selectedCity,setSelectedCity] = useState('--Choose City--')
- 
-	 
+    const [disabled,setDisabled] = useState(true);
+    const [bounds,setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
+    const draggleRef = React.createRef();
+    const handleOk = e => { 
+      setVisible(false);
+    };
+  
+    const handleCancel = e => {
+      console.log(e);
+      setVisible(false);
+    };
+  
+    const onStart = (event, uiData) => {
+      const { clientWidth, clientHeight } = window?.document?.documentElement;
+      const targetRect = draggleRef?.current?.getBoundingClientRect();
+      setBounds({
+          left: -targetRect?.left + uiData?.x,
+          right: clientWidth - (targetRect?.right - uiData?.x),
+          top: -targetRect?.top + uiData?.y,
+          bottom: clientHeight - (targetRect?.bottom - uiData?.y),
+        });
+    };
+    
     const changeGov = (event) => {
 		setSelectedGov(event.target.value);
         console.log(event.target.value) 
@@ -20,7 +42,44 @@ const AddCenter = () => {
 		setSelectedCity(event.target.value); 
 	}
 	return (
-		<div id="container">
+    <Modal
+    title={
+      <div
+        style={{
+          width: '100%',
+          cursor: 'move',
+        }}
+        onMouseOver={() => {
+          if (disabled) {
+              setDisabled(false);
+          }
+        }}
+        onMouseOut={() => {
+          setDisabled(true);
+        }}
+        // fix eslintjsx-a11y/mouse-events-have-key-events
+        // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/master/docs/rules/mouse-events-have-key-events.md
+        onFocus={() => {}}
+        onBlur={() => {}}
+        // end
+      >
+        Add center
+      </div>
+    }
+    visible={visible}
+    onOk={handleOk}
+    onCancel={handleCancel}
+    modalRender={modal => (
+      <Draggable
+        disabled={disabled}
+        bounds={bounds}
+        onStart={(event, uiData) => onStart(event, uiData)}
+      >
+        <div ref={draggleRef}>{modal}</div>
+      </Draggable>
+    )}
+  >
+  <div id="container">
 			<h2>Add center</h2> 
             <div>
                 <label>Center name</label> <br />
@@ -50,6 +109,9 @@ const AddCenter = () => {
 				</div>
 				 
 			</div>
+      
+  </Modal>
+		
 		)
 	 
 }
