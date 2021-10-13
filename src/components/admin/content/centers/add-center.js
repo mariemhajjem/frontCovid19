@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import gouvernorat from '../../../constants/gouvernorat'
-import villes from '../../../constants/villes'
+import gouvernorat from '../../../../constants/gouvernorat'
+import villes from '../../../../constants/villes'
 
 const AddCenter = () => {  
     const [gov,setGov] = useState('default')
