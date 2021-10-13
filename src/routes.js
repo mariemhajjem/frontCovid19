@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import  Admin  from './admin'; 
-import  User  from './user';
-import  Auth  from './auth';
-import  Operator  from './operator'; 
-import NotAuthorized from './notAuthorized';
+import  Admin  from './components/admin'; 
+import  User  from './components/user';
+import  Auth  from './components/auth';
+import  Operator  from './components/operator'; 
+import NotAuthorized from './components/notAuthorized';
 import Drop from './dropdown';
 import Home from './home';
 const Routes = () => (
