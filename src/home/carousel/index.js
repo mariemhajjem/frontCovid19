@@ -8,7 +8,16 @@ const contentStyle = {
   textAlign: 'center',
   background: '#364d79',
 }; 
+function getCurrentDate(separator = "-") {
+    let newDate = new Date();
+    let date = newDate.getDate();
+    let month = newDate.getMonth() + 1;
+    let year = newDate.getFullYear();
 
+    return `${year}${separator}${
+      month < 10 ? `0${month}` : `${month}`
+    }${separator}${date}`;
+  }
 const CarouselComponent = () => {
   return (
         <Carousel autoplay>
@@ -25,7 +34,7 @@ const CarouselComponent = () => {
                 <div style={contentStyle}> 
                     <Title>Nombre d'inscrits</Title>
                     <Title level={2}>6470552</Title>
-                    <Title level={2}>09:18:19</Title> 
+                    <Title level={2}>Date : { getCurrentDate()}</Title> 
                 </div> 
             </div> 
         </Carousel>
