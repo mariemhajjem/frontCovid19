@@ -3,8 +3,9 @@ import Axios from "axios"
 let baseUrl = "http://localhost:5000/api/centers" ;
 
 export const addCenter = async (center) => {
+  console.log(center)
   const result = await Axios.post(
-    baseUrl + "/centers/add",
+    baseUrl + "/add",
     center
   )
   return result.data
@@ -15,7 +16,7 @@ export const updateCenter = async (center) => {
     baseUrl + "/update" ,
     center
   )
-  return result.data.center
+  return result.data.updatedCenter
 }
 
 export const deleteCenter = async (name) => {
