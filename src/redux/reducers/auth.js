@@ -1,26 +1,26 @@
 import * as types from "../types"
 
-const initialState = {
-  user: {},
-  loading: false,
-  errors: false, 
-}
+let user = JSON.parse(localStorage.getItem('token'));
+
+const initialState = user ? { loggedIn: true, user } : {};
 
 const auth = (state = initialState, action) => {
-    switch (action.type) {
-        case types.REGISTER_USER:
-          return {
-            ...state,
-            user: action.id,
-          }
-        case types.FETCH_USER_REQUEST:
-            return { ...state, loading: true, error: true }
-        case types.FETCH_USER_SUCCESS:
-            return { ...state, user: [...action.user], loading: false }
-        case types.FETCH_USER_FAILURE:
-            return { ...state, error: true, loading: false } 
-        default :
-            return state
+
+  switch (action.type) {
+
+    case LOGIN_SUCCESS:
+      return {
+        loggedIn: true,
+        user: action.payload
+      };
+    case LOGIN_FAIL:
+      return {};
+
+
+    default:
+      return state 
     }
 }
+
+
 export default auth;

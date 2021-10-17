@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button  } from 'antd'; 
+import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button, Spin, Alert, Space} from 'antd'; 
 import { useDispatch, useSelector } from "react-redux"
 import * as actions from '../../../../redux/actions/centers'
 import AddCenter from './add-center'; 
@@ -40,23 +40,18 @@ const EditableCell = ({
 };
 
 const CentersList = () => {
+  const isAddVisible = useSelector((state) => state.centers.displayed) 
+  const errors = useSelector((state) => state.centers.errors)  
   const [form] = Form.useForm();
-  const centers = useSelector((state) => state.centers)
-  const [data, setData] = useState(centers.list.map((center,key) =>({
-    ...center,
-    key: key.toString()
-  })));
-  const [editingKey, setEditingKey] = useState('');
-  const [visible,setVisible] = useState(false);  
+  const centers = useSelector((state) => state.centers) 
+  const [editingKey, setEditingKey] = useState(''); 
   const dispatch = useDispatch() 
   
   useEffect(() => {
     dispatch(actions.fetchCenters())  
   }, [])
-  const showModal = () => {
-    setVisible( true);
-  }; 
-  const isEditing = (record) => record.key === editingKey;
+   
+  const isEditing = (record) => record._id === editingKey;
 
   const edit = (record) => {
     form.setFieldsValue({
@@ -66,29 +61,21 @@ const CentersList = () => {
       center_capacity: '',
       ...record,
     });
-    setEditingKey(record.key);
+    setEditingKey(record._id);
   };
 
   const cancel = () => {
     setEditingKey('');
   };
 
-  const save = async (key) => {
-    try {
-      const row = await form.validateFields();
-      const newData = [...data];
-      const index = newData.findIndex((item) => key === item.key);
-
-      if (index > -1) {
-        const item = newData[index];
-        newData.splice(index, 1, { ...item, ...row });
-        setData(newData);
-        setEditingKey('');
-      } else {
-        newData.push(row);
-        setData(newData);
-        setEditingKey('');
-      }
+  const save = async (id) => {
+    try { 
+      const row = await form.validateFields(); 
+      console.log('row edited :',row)
+      row.id=id
+      console.log('row edited with id:',row) 
+      dispatch(actions.updateCenter(row)) 
+      setEditingKey(''); 
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
@@ -128,7 +115,7 @@ const CentersList = () => {
           <span>
             <Button
               type="text"
-              onClick={() => save(record.key)}
+              onClick={() => save(record._id)}
               style={{
                 marginRight: 8,
               }}
@@ -150,10 +137,11 @@ const CentersList = () => {
         title: 'Delete',
         dataIndex: 'delete',
         render: (text, record) => (
-          <Button> Delete</Button>
+          <Button onClick={() =>dispatch(actions.deleteCenter(record.name))}> Delete</Button>
         ),
       },
   ];
+  
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
@@ -175,7 +163,7 @@ const CentersList = () => {
       <>
     <Form form={form} component={false}>
         <Button
-          onClick={showModal}
+          onClick={()=>dispatch(actions.setDisplayed(true))}
           type="primary"
           style={{
             marginBottom: 16,
@@ -183,15 +171,31 @@ const CentersList = () => {
         >
           Add center
         </Button>
-        {visible && <AddCenter visible={visible} setVisible={setVisible} />}
-      {centers &&<Table
+        <br />
+      { isAddVisible && <AddCenter /> }
+      
+      {centers.loading &&  <Space size="middle"><Spin size="large" /></Space>}
+      {errors &&  <Alert
+        message="Error Text"
+        showIcon
+        description="Error 500 || 400"
+        type="error"
+        action={
+          <Button size="small" danger>
+            Detail
+          </Button>
+        }
+        closable
+      />}
+      {!centers.loading && !errors && centers.list && <Table
         components={{
           body: {
             cell: EditableCell,
           },
         }}
         bordered
-        dataSource={data}
+        rowKey={record => record._id}
+        dataSource={centers.list}
         columns={mergedColumns}
         rowClassName="editable-row"
         pagination={{

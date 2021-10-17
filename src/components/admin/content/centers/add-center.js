@@ -1,24 +1,52 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from "react-redux" 
 import gouvernorat from '../../../../constants/gouvernorat'
-import villes from '../../../../constants/villes'
-import { Modal  } from 'antd';
+import villes from '../../../../constants/villes'  
+import { Modal, Button } from "antd";
+import { Form, Input, Select, InputNumber } from "antd";
+import * as actions from '../../../../redux/actions/centers' 
 import Draggable from 'react-draggable';
 
-const AddCenter = ({visible,setVisible}) => {   
-    const [cities,setCities] = useState([])
-    const [selectedGov,setSelectedGov] = useState('--Choose Gov--')
-    const [selectedCity,setSelectedCity] = useState('--Choose City--')
+const AddCenter = () => {   
+    
     const [disabled,setDisabled] = useState(true);
     const [bounds,setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
     const draggleRef = React.createRef();
-    const handleOk = e => { 
-      setVisible(false);
-    };
+    const isModalVisible = useSelector((state) => state.centers.displayed) 
+    const [cities,setCities] = useState([])
+    const [selectedGov,setSelectedGov] = useState('')
+    const [selectedCity,setSelectedCity] = useState('') 
+    const [name,setName] = useState('') 
+    const [capacity,setCapacity] = useState(0) 
+    const dispatch = useDispatch() 
+    const handleCancel = () => {
+      dispatch(actions.setDisplayed(false))  
+    }; 
+    
+    const changeGov = (gover) => {
+      setSelectedGov(gover);
+      const found = villes.find((ville) => ville.gov === gover).cities 
+      setCities(found ? found: []);
+          
+    }
   
-    const handleCancel = e => {
-      console.log(e);
-      setVisible(false);
+    const changeCity = (value) => {
+      setSelectedCity(value); 
+    }
+    const handleSubmit = async () =>{
+      const center ={
+        name, 
+        governorate:selectedGov, 
+        city:selectedCity,
+        center_capacity:capacity,
+        number_vaccine:capacity,
+      } 
+      dispatch(actions.addCenter(center)) 
+    }
+    const handleOk = e => {  
+      dispatch(actions.setDisplayed(false))  
     };
+   
   
     const onStart = (event, uiData) => {
       const { clientWidth, clientHeight } = window?.document?.documentElement;
@@ -30,17 +58,7 @@ const AddCenter = ({visible,setVisible}) => {
           bottom: clientHeight - (targetRect?.bottom - uiData?.y),
         });
     };
-    
-    const changeGov = (event) => {
-		setSelectedGov(event.target.value);
-        console.log(event.target.value) 
-		setCities(villes.find(ville => ville.gov === event.target.value).cities);
-        console.log(cities) 
-	}
-
-	const changeCity = (event) => {
-		setSelectedCity(event.target.value); 
-	}
+ 
 	return (
     <Modal
     title={
@@ -66,7 +84,7 @@ const AddCenter = ({visible,setVisible}) => {
         Add center
       </div>
     }
-    visible={visible}
+    visible={isModalVisible}
     onOk={handleOk}
     onCancel={handleCancel}
     modalRender={modal => (
@@ -79,36 +97,68 @@ const AddCenter = ({visible,setVisible}) => {
       </Draggable>
     )}
   >
-  <div id="container">
-			<h2>Add center</h2> 
-            <div>
-                <label>Center name</label> <br />
-                <input />
-            </div> <br />
-            <div>
-                <label>Center capacity</label> <br />
-                <input type="number" />
-            </div><br />
-	            <div>
-					<label>Governorate</label> <br />
-					<select placeholder="Governorate" value={selectedGov} onChange={changeGov}>
-						<option>--Choose Governorate--</option>
-						{gouvernorat?.map((gov, key) => {
-							return <option key={key}>{gov}</option>;
-						})}
-					</select>
-				</div><br />
-                <div>
-					<label>City</label> <br />
-					<select placeholder="State" value={selectedCity} onChange={changeCity}>
-						<option>--Choose State--</option>
-						{cities?.map((e, key) => {
-							return <option key={key}>{e}</option>;
-						})}
-					</select>
-				</div>
-				 
-			</div>
+  <Form
+          name="control-ref"
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 14 }}
+          layout="horizontal"
+          
+        >
+          <Form.Item
+            label="center_name:"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Input name="center_name" onChange={e => setName(e.target.value)}/>
+          </Form.Item>
+          <Form.Item
+            label="gouvernorat"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Select value={selectedGov} onChange={changeGov}>
+              <Select.Option>--Choose Governorate--</Select.Option>
+              {gouvernorat?.map((gov, key) => {
+                return <Select.Option key={key} value={gov} >{gov}</Select.Option>
+              })}
+              </Select>
+          </Form.Item>
+          <Form.Item
+            label="city"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Select value={selectedCity} onChange={changeCity}>
+            <Select.Option>--Choose City--</Select.Option>
+            {cities?.map((city, key) => {
+              return <Select.Option key={key} value={city}>{city}</Select.Option>
+            })}
+            </Select>
+          </Form.Item>
+             
+           
+          <Form.Item
+            label="center_capacity:"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Input name="capacity" /* value={capacity} */ onChange={e => setCapacity(e.target.value)}/>
+          </Form.Item>
+
+          <Button onClick={handleSubmit}> Add center </Button>
+        </Form>
       
   </Modal>
 		
@@ -117,111 +167,3 @@ const AddCenter = ({visible,setVisible}) => {
 }
 
 export default AddCenter;
-
-
-/* import {  Form, Input, Button, Select  } from 'antd';
-import { useState, useEffect } from 'react';
-import gouvernorat from '../../../constants/gouvernorat'
-import villes from '../../../constants/villes'
-const { Option } = Select;
-
-const layout = {
-  labelCol: {
-    span: 8,
-  },
-  wrapperCol: {
-    span: 16,
-  },
-};
-const tailLayout = {
-  wrapperCol: {
-    offset: 8,
-    span: 16,
-  },
-};
-const AddCenter = () => {
-  const [form] = Form.useForm();
-  const [gov,setGov] = useState('default')
-  const [cities,setCities] = useState([])
-  const onGovChange = (value) => {  console.log(value)
-    setGov(value) ;
-   
-    setCities(villes.find(ville => ville.gov === value).cities);
-  };
-  const onCityChange = (value) => {
-    console.log(value);
-  };
-  const onFinish = (values) => {
-    console.log(values);
-  };
-
-  const onReset = () => {
-    form.resetFields();
-  }; 
-  useEffect(()=>{
-
-  },[gov,cities])
-  return (
-    <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
-      <Form.Item
-        name="name"
-        label="Center name"
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item
-        name="governorate"
-        label="governorate"
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-      >
-        <Select
-          placeholder="Select a option and change input text above"
-          onChange={onGovChange}
-          value={gov}
-          allowClear
-        >
-          { gouvernorat?.map((gov, key)=> <Option key={key} value={gov}>{gov}</Option> )}
-          
-        </Select>
-      </Form.Item> 
-      <Form.Item
-        name="cities"
-        label="cities"
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-      >
-        <Select
-          placeholder="Select a option and change input text above"
-          onChange={onCityChange}
-          allowClear
-        >
-          { cities?.map((city, key)=> <Option key={key} value={city}>{city}</Option> )}
-          
-        </Select>
-      </Form.Item> 
-      <Form.Item {...tailLayout}>
-        <Button type="primary" htmlType="submit">
-          Submit
-        </Button>
-        <Button htmlType="button" onClick={onReset}>
-          Reset
-        </Button> 
-      </Form.Item>
-    </Form>
-  );
-};
-  
-export default AddCenter;
- */

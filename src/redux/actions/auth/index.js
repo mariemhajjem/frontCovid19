@@ -1,57 +1,51 @@
 import * as types from "../../types"
 import * as api from "../../../services/auth.service"
 
-export const setSelectedCenter = (id) => ({
-  type: types.SET_SELECTED_CENTER,
-  id
-})
+export const login = (cin, password) => async (dispatch) => {
+  const loggedUser ={
+    cin,
+    password
+   }
+  try {
+      const user = await api.login(loggedUser) 
+      dispatch({
+          type: types.LOGIN_SUCCESS,
+          payload: user,
+      });
+  } catch (e) {
+            dispatch({
+            type: types.LOGIN_FAIL,
+            payload: {},
+                });
+  }
+ 
+};
+/*
+export const register = (values) => (dispatch) => {
 
-export const fetchCenters = () => async (dispatch) => {
-   dispatch({
-     type: types.FETCH_CENTERS_REQUEST,
-     
-   })
-      try {
-        const centers = await api.fetchCenters()
-         dispatch({
-           type: types.FETCH_CENTERS_SUCCESS,
-           centers,
-         })
-      } catch (e) {
-       dispatch({
-         type: types.FETCH_CENTERS_FAILURE,
-       })
+  return registerFromAPI(values).then(
+      (result) => {
+
+          if (result.error === false) {
+              // store user details and jwt token in local storage to keep user logged in between page refreshes
+              /*localStorage.setItem('user', JSON.stringify(result.data));
+               dispatch({
+                   type: REGISTER_SUCCESS,
+                   payload: result.data,
+               });
+               
+              
+              return true
+
+          } else {
+              dispatch({
+                  type: REGISTER_FAIL,
+                  payload: {},
+              });
+              return result.data
+
+          }
       }
-}
 
-export const fetchCenterByName = (id) => async (dispatch) => {
-  const center = await api.fetchCenterByName(id)
-  dispatch ( {
-    type: types.FETCH_CENTER_BY_ID,
-    center,
-  })
-}
-
-export const addCenter = (center) => async (dispatch) => {
-  const newCenter = await api.addCenter(center)
-
-  dispatch({
-    type: types.ADD_CENTER,
-    center: newCenter,
-  })
-}
-
-export const updateCenter = ( center) => async (dispatch) => {
-  const updatedCenter = await api.updateCenter( center)
-
-  dispatch ( {
-    type: types.UPDATE_CENTER,
-    center: updatedCenter,
-  })
-}
-export const deleteCenter = (name) => async (dispatch) => {
-  await api.deleteCenter(name)
-  dispatch ( {
-    type: types.DELETE_CENTER,
-  })
-}
+  );
+*/
